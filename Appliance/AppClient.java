@@ -84,7 +84,6 @@ class AppClient {
             if (appliance.getApplianceID() == applianceIDToDelete) {
                 appliances.remove(appliance);
                 System.out.println("Appliance deleted successfully!");
-                 scnr.close(); 
                 return;
             }
         }
