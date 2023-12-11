@@ -3,6 +3,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
 
 class AppClient {
     private List<Appliance> appliances = new ArrayList<>();
@@ -189,6 +192,8 @@ class AppClient {
                         if (smartAppliance.getLowPower() > 0.0) {
                             System.out.println(appliance.getAppName() + " is turned to LOW at location " + appliance.getLocationID());
                             smartAppliancesTurnedLow++;
+                             bufferedWriter.write(appliance.getAppName() + " at location " + appliance.getLocationID() + "is turned to LOW");
+                             bufferedWriter.newLine();
                         }
                     }
                 } else {
@@ -210,20 +215,28 @@ class AppClient {
             // Display results for each step
             System.out.println("Smart appliances turned to LOW: " + smartAppliancesTurnedLow);
             System.out.println("Browned out locations: " + brownedOutLocations);
+            bufferedWriter.write("Smart appliances turned to LOW: " + smartAppliancesTurnedLow);
+             bufferedWriter.newLine();
+            bufferedWriter.write("Browned out locations: " + brownedOutLocations);
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+ try (FileWriter fileWriter = new FileWriter("detailed_report.txt", true);
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
     // Display summary report
     System.out.println("\nSummary Report:");
     for (int i = 1; i <= numSteps; i++) {
         System.out.println("Step " + i + ": Browned out locations - " + locationsAffected[i]);
+        bufferedWriter.write("Step " + i + ": Browned out locations - " + locationsAffected[i]);
+         bufferedWriter.newLine();
     }
     System.out.println("Max affected locations during the simulation: " + maxAffectedLocations);
-
+    } catch (IOException e) {
+            e.printStackTrace();
+        }
     break;
 
 
