@@ -128,71 +128,104 @@ class AppClient {
                     app.readAppFile(filePath);
                     break;
                case "S":
-                    System.out.print("Enter the number of simulation steps: ");
-                    int numSteps = scan.nextInt();
-                    scan.nextLine();  // Consume newline
+    // Prompt the user for the number of simulation steps
+    System.out.print("Enter the number of simulation steps: ");
+    int numSteps = 0;
 
-                    int[] locationsAffected = new int[numSteps + 1];  // Array to store the number of affected locations at each step
-                    int maxAffectedLocations = 0;  // To store the maximum affected locations during the simulation
+    // Input validation for simulation steps
+    while (true) {
+        try {
+            numSteps = Integer.parseInt(scan.nextLine());
+            if (numSteps > 0) {
+                break;
+            } else {
+                System.out.println("Please enter a positive integer for simulation steps.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid integer for simulation steps.");
+        }
+    }
 
-                    for (int step = 1; step <= numSteps; step++) {
-                        System.out.println("Simulation Step: " + step);
+    // Prompt the user for the total allowed wattage
+    System.out.print("Enter the total allowed wattage for the simulation: ");
+    int totalWattage = 0;
 
-                        int smartAppliancesTurnedLow = 0;
-                        int brownedOutLocations = 0;
+    // Input validation for total allowed wattage
+    while (true) {
+        try {
+            totalWattage = Integer.parseInt(scan.nextLine());
+            if (totalWattage > 0) {
+                break;
+            } else {
+                System.out.println("Please enter a positive integer for total allowed wattage.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid integer for total allowed wattage.");
+        }
+    }
 
-                        // Create a FileWriter and BufferedWriter to write detailed report to a text file
-                        try (FileWriter fileWriter = new FileWriter("detailed_report.txt", true);
-                             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+    int[] locationsAffected = new int[numSteps + 1];
+    int maxAffectedLocations = 0;
 
-                            bufferedWriter.write("Simulation Step: " + step);
-                            bufferedWriter.newLine();
+    for (int step = 1; step <= numSteps; step++) {
+        System.out.println("Simulation Step: " + step);
 
-                            for (Appliance appliance : app.appliances) {
-                                boolean isTurnedOn = appliance.isTurnedOn();
+        int smartAppliancesTurnedLow = 0;
+        int brownedOutLocations = 0;
 
-                                if (isTurnedOn) {
-                                    if (appliance instanceof SmartAppliance) {
-                                        SmartAppliance smartAppliance = (SmartAppliance) appliance;
-                                        if (smartAppliance.getLowPower() > 0.0) {
-                                            System.out.println(appliance.getAppName() + " is turned to LOW at location " + appliance.getLocationID());
-                                            smartAppliancesTurnedLow++;
-                                        }
-                                    }
-                                } else {
-                                    System.out.println(appliance.getAppName() + " is turned off at location " + appliance.getLocationID());
-                                    brownedOutLocations++;
-                                    bufferedWriter.write(appliance.getAppName() + " at location " + appliance.getLocationID() + " is turned off.");
-                                    bufferedWriter.newLine();
-                                }
-                            }
+        // Create a FileWriter and BufferedWriter to write detailed report to a text file
+        try (FileWriter fileWriter = new FileWriter("detailed_report.txt", true);
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
 
-                            // Update locationsAffected array
-                            locationsAffected[step] = brownedOutLocations;
+            bufferedWriter.write("Simulation Step: " + step);
+            bufferedWriter.newLine();
 
-                            // Update maxAffectedLocations
-                            if (brownedOutLocations > maxAffectedLocations) {
-                                maxAffectedLocations = brownedOutLocations;
-                            }
+            for (Appliance appliance : app.appliances) {
+                boolean isTurnedOn = appliance.isTurnedOn();
 
-                            // Display results for each step
-                            System.out.println("Smart appliances turned to LOW: " + smartAppliancesTurnedLow);
-                            System.out.println("Browned out locations: " + brownedOutLocations);
-                            bufferedWriter.newLine();
-                            bufferedWriter.flush();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                if (isTurnedOn) {
+                    if (appliance instanceof SmartAppliance) {
+                        SmartAppliance smartAppliance = (SmartAppliance) appliance;
+                        if (smartAppliance.getLowPower() > 0.0) {
+                            System.out.println(appliance.getAppName() + " is turned to LOW at location " + appliance.getLocationID());
+                            smartAppliancesTurnedLow++;
                         }
                     }
+                } else {
+                    System.out.println(appliance.getAppName() + " is turned off at location " + appliance.getLocationID());
+                    brownedOutLocations++;
+                    bufferedWriter.write(appliance.getAppName() + " at location " + appliance.getLocationID() + " is turned off.");
+                    bufferedWriter.newLine();
+                }
+            }
 
-                    // Display summary report
-                    System.out.println("\nSummary Report:");
-                    for (int i = 1; i <= numSteps; i++) {
-                        System.out.println("Step " + i + ": Browned out locations - " + locationsAffected[i]);
-                    }
-                    System.out.println("Max affected locations during the simulation: " + maxAffectedLocations);
+            // Update locationsAffected array
+            locationsAffected[step] = brownedOutLocations;
 
-                    break;
+            // Update maxAffectedLocations
+            if (brownedOutLocations > maxAffectedLocations) {
+                maxAffectedLocations = brownedOutLocations;
+            }
+
+            // Display results for each step
+            System.out.println("Smart appliances turned to LOW: " + smartAppliancesTurnedLow);
+            System.out.println("Browned out locations: " + brownedOutLocations);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Display summary report
+    System.out.println("\nSummary Report:");
+    for (int i = 1; i <= numSteps; i++) {
+        System.out.println("Step " + i + ": Browned out locations - " + locationsAffected[i]);
+    }
+    System.out.println("Max affected locations during the simulation: " + maxAffectedLocations);
+
+    break;
+
 
 
                 case "Q":
