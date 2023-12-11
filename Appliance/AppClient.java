@@ -127,30 +127,73 @@ class AppClient {
                     String filePath = scan.nextLine();
                     app.readAppFile(filePath);
                     break;
-                case "S":
+               case "S":
                     System.out.print("Enter the number of simulation steps: ");
                     int numSteps = scan.nextInt();
+                    scan.nextLine();  // Consume newline
+
+                    int[] locationsAffected = new int[numSteps + 1];  // Array to store the number of affected locations at each step
+                    int maxAffectedLocations = 0;  // To store the maximum affected locations during the simulation
 
                     for (int step = 1; step <= numSteps; step++) {
                         System.out.println("Simulation Step: " + step);
-                        
-                        // Iterate through each appliance and simulate its behavior
-                        for (Appliance appliance : app.appliances) {
-                            boolean isTurnedOn = appliance.isTurnedOn();
 
-                            if (isTurnedOn) {
-                                System.out.println(appliance.getAppName() + " is turned on at location " + appliance.getLocationID());
-                            } else {
-                                System.out.println(appliance.getAppName() + " is turned off at location " + appliance.getLocationID());
+                        int smartAppliancesTurnedLow = 0;
+                        int brownedOutLocations = 0;
+
+                        // Create a FileWriter and BufferedWriter to write detailed report to a text file
+                        try (FileWriter fileWriter = new FileWriter("detailed_report.txt", true);
+                             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+
+                            bufferedWriter.write("Simulation Step: " + step);
+                            bufferedWriter.newLine();
+
+                            for (Appliance appliance : app.appliances) {
+                                boolean isTurnedOn = appliance.isTurnedOn();
+
+                                if (isTurnedOn) {
+                                    if (appliance instanceof SmartAppliance) {
+                                        SmartAppliance smartAppliance = (SmartAppliance) appliance;
+                                        if (smartAppliance.getLowPower() > 0.0) {
+                                            System.out.println(appliance.getAppName() + " is turned to LOW at location " + appliance.getLocationID());
+                                            smartAppliancesTurnedLow++;
+                                        }
+                                    }
+                                } else {
+                                    System.out.println(appliance.getAppName() + " is turned off at location " + appliance.getLocationID());
+                                    brownedOutLocations++;
+                                    bufferedWriter.write(appliance.getAppName() + " at location " + appliance.getLocationID() + " is turned off.");
+                                    bufferedWriter.newLine();
+                                }
                             }
 
-                            // You can add more simulation logic here based on the appliance's state
-                            // For example, if it's a smart appliance, you can simulate switching to low power.
-                        }
+                            // Update locationsAffected array
+                            locationsAffected[step] = brownedOutLocations;
 
-                        System.out.println(); // Add a newline for better readability between simulation steps
+                            // Update maxAffectedLocations
+                            if (brownedOutLocations > maxAffectedLocations) {
+                                maxAffectedLocations = brownedOutLocations;
+                            }
+
+                            // Display results for each step
+                            System.out.println("Smart appliances turned to LOW: " + smartAppliancesTurnedLow);
+                            System.out.println("Browned out locations: " + brownedOutLocations);
+                            bufferedWriter.newLine();
+                            bufferedWriter.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+
+                    // Display summary report
+                    System.out.println("\nSummary Report:");
+                    for (int i = 1; i <= numSteps; i++) {
+                        System.out.println("Step " + i + ": Browned out locations - " + locationsAffected[i]);
+                    }
+                    System.out.println("Max affected locations during the simulation: " + maxAffectedLocations);
+
                     break;
+
 
                 case "Q":
                     System.out.println("Quitting the program. Goodbye!");
