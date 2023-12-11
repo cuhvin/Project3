@@ -26,6 +26,7 @@ public class ApplianceGenerator {
 		File inputFile = new File( "ApplianceDetail.txt" );
 		Scanner scan = new Scanner( inputFile );
 		int count=0;
+		
 		while ( scan.hasNext( ) ) {
 			StringTokenizer stringToken = new StringTokenizer(scan.nextLine());
 			app[count] = new Appliance(stringToken.nextToken(","),
@@ -66,6 +67,7 @@ Smart appliances (if "on") power reduction percent when changed to "low" status(
 					bw.write(String.valueOf(app[index].probSmart));
 					bw.newLine( );
 					bw.flush();
+				
 					
 				}
 			}
